@@ -1,0 +1,164 @@
+﻿@using TMS.Areas.Operator.ViewModels
+@using System.Globalization
+@model OperatorScheduleViewModel
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+
+@{
+    DateTime dt = Model.SelectedDate;
+
+    Calendar cal = new CultureInfo("sv-SE").Calendar;
+    int weekNumber = cal.GetWeekOfYear(dt, CalendarWeekRule.FirstFullWeek, DayOfWeek.Monday);
+
+    int dayOfWeek = (int)dt.DayOfWeek;
+
+    DateTime Sunday = dt.AddDays(dayOfWeek == 0 ? 0 : 7 - dayOfWeek);
+
+
+
+    DateTime Monday = dt.AddDays((-1) * (dayOfWeek == 0 ? 6 : dayOfWeek - 1));
+    DateTime Tuesday = Monday.AddDays(1);
+    DateTime Wednesday = Monday.AddDays(2);
+    DateTime Thursday = Monday.AddDays(3);
+    DateTime Friday = Monday.AddDays(4);
+    DateTime Saturday = Monday.AddDays(5);
+
+    string prevWeekMonday = Monday.AddDays(-7).ToString("yyy-MM-dd");
+    string nextWeekMonday = Monday.AddDays(7).ToString("yyy-MM-dd");
+
+}
+
+<div class="container overflow-auto mt-0 mx-0 " style="border: 1px solid lightgray; border-radius: 2px; width: 1200px; background-color: rgb(220 225 234)">
+
+
+    <div class="px-3 pt-1 mt-4" style="height:50px; border: 1px solid black; background-color: rgb(42 42 42); color: white; display:flex; align-items: center">
+        <span class="h5 text-white">Ticket summary</span>
+    </div>
+    <div class="border">
+        <div class="p-2 overflow-auto bg-light" style="height:300px;">
+            <table class="table table-light table-striped table-hover table-borderless">
+                <thead class="table-light">
+                    <tr>
+                        <th scope="col" style="white-space: nowrap !important;">Date</th>
+                        <th scope="col" style="white-space: nowrap !important;">Urgency</th>
+                        <th scope="col" style="white-space: nowrap !important;">Summary</th>
+                    </tr>
+
+                    @foreach (var item in Model.TodoRows)
+                    {
+                        <tr class=" border-top cli" role="button" onclick="location.href = '@Url.Action("start", "start", new { inputDate = item.Key.ToString("yyyy-MM-dd") })'">
+                            <td>@item.Key.ToString("yyyy-MM-dd")</td>
+                            <td>
+                                @foreach (string u in item.Value)
+                                {
+                                    <img src="~/lib/@(u).png" style="height: 18px;" />
+                                }
+                            </td>
+                            <td>@item.Value.Count() ticket(s) require attention</td>
+                        </tr>
+                    }
+
+                </thead>
+
+            </table>
+        </div>
+    </div>
+
+
+    <hr class="link-secondary my-4" />
+
+    <div class="px-3 pt-1 mt-4" style="height:50px; border: 1px solid black; background-color: rgb(42 42 42); color: white; display:flex; align-items: center">
+        <span class="h5 text-white">Schedule</span>
+    </div>
+    <div class="border bd-around  bg-light">
+
+        <!-- Schedule Top Navigation -->
+        <nav class="nav nav-tabs ">
+            <a class="nav-link @(dayOfWeek==1 ? "active":"")" asp-route-inputdate="@Monday.ToString("yyyy-MM-dd")">Mon</a>
+            <a class="nav-link @(dayOfWeek==2 ? "active":"")" asp-route-inputdate="@Tuesday.ToString("yyyy-MM-dd")">Tue</a>
+            <a class="nav-link @(dayOfWeek==3 ? "active":"")" asp-route-inputdate="@Wednesday.ToString("yyyy-MM-dd")">Wed</a>
+            <a class="nav-link @(dayOfWeek==4 ? "active":"")" asp-route-inputdate="@Thursday.ToString("yyyy-MM-dd")">Thu</a>
+            <a class="nav-link @(dayOfWeek==5 ? "active":"")" asp-route-inputdate="@Friday.ToString("yyyy-MM-dd")">Fri</a>
+            <a class="nav-link @(dayOfWeek==6 ? "active":"")" asp-route-inputdate="@Saturday.ToString("yyyy-MM-dd")">Sat</a>
+            <a class="nav-link @(dayOfWeek==0 ? "active":"")" asp-route-inputdate="@Sunday.ToString("yyyy-MM-dd")">Sun</a>
+
+            <span class="bg-white border rounded-1 px-4 pt-2"><a asp-route-inputdate="@prevWeekMonday"><i class="fas fa-caret-left"></i></a></span>
+            <span class="bg-white border rounded-1 px-4 pt-2">Week @weekNumber</span>
+            <span class="bg-white border rounded-1 px-4 pt-2"><a asp-route-inputdate="@nextWeekMonday"><i class="fas fa-caret-right"></i></a></span>
+
+            <span class="bg-white border rounded-1 px-4 pt-2"><a style="text-decoration: none" asp-route-inputdate="@(DateTime.Now.ToString("yyyy-MM-dd"))">Today</a></span>
+
+        </nav>
+
+        <div class="tab-content">
+            <div class="tab-pane show active">
+                <div class="row">
+                    <div class="col-6">
+                        <span class="small p-2"> @Model.SelectedDate.ToString("yyyy-MM-dd")</span>
+                    </div>
+                    <div class="col-5">
+                       
+                    </div>
+                </div>
+
+                @foreach (var scheduleItem in Model.ScheduleItems)
+                {
+                    <!-- Schedule Items -->
+                    <div class="row ">
+                        <div class="col-md-12 my-4">
+                            <div class="card shadow-sm">
+                                @if (scheduleItem.Ticket.Closed != DateTime.MinValue)
+                                {
+                                    <div class="card-header" style="background-color: rgb(118 193 121)">
+                                        <span class="text-secondary">Ticket head:  @(scheduleItem.Ticket.TicketTitle)</span>
+                                        <span class="text-secondary float-end">Closed on: @(scheduleItem.Ticket.Closed.ToString("yyyy-MM-dd"))</span>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="card-header">
+                                        Ticket head:  @(scheduleItem.Ticket.TicketTitle)
+                                    </div>
+                                }
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-4">
+                                            <span class="small m-1 d-block">ID: @scheduleItem.Ticket.Id</span>
+                                            <span class="small m-1 d-block">
+                                                Priority:
+                                                <img src="~/lib/@(scheduleItem.Ticket.Urgency + ".png")" style="height: 18px;" class="mb-1" />
+                                                @scheduleItem.Ticket.Urgency
+                                            </span>
+                                            <span class="small m-1 d-block">Assigned by: @scheduleItem.CoordinatorName</span>
+                                            <span class="small m-1 d-block">Created: @scheduleItem.Ticket.Created.ToString("yyyy-MM-dd")</span>
+                                        </div>
+                                        <div class="col-5">
+                                            <h6>Start time.</h6> <strong>@scheduleItem.StartTime.ToString("HH:mm")</strong>
+                                        </div>
+                                        <div class="col-3">
+                                            <h6>End time.</h6> <strong>@scheduleItem.EndTime.ToString("HH:mm")</strong>
+                                            <div class="border rounded-3 m-2 shadow-sm" style="text-align: right">
+                                                Print job order <i class="fas fa-print mx-3 text-primary"></i><br />
+                                                Send job order <i class="fas fa-envelope-open-text mx-3 text-primary"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col" style="text-align:center">
+                                            <a role="button" data-bs-toggle="collapse" data-bs-target="#ticketBody@(scheduleItem.Ticket.Id)" aria-expanded="false" aria-controls="ticketBody@(scheduleItem.Ticket.Id)"><i class="fas fa-chevron-down fa-2x" style="color: silver"></i></a>
+                                            <div class="collapse" id="ticketBody@(scheduleItem.Ticket.Id)">
+                                                <div class="card card-body text-start">
+                                                    @scheduleItem.Ticket.TicketBody
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+
+            </div>
+        </div>
+    </div>
+</div>

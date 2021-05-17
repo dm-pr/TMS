@@ -1,0 +1,45 @@
+﻿@using TMS.ViewModels;
+@model TicketViewModel
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+<div class="container overflow-auto mt-0 mx-0 " style="border: 1px solid lightgray; border-radius: 2px; width: 1200px; background-color: rgb(220 225 234)">
+    <div class="px-3 pt-1" style="height:50px; border: 1px solid black; background-color: rgb(42 42 42); color: white; display:flex; align-items: center">
+        <span class="h5 text-white">Add custom ticket entry</span>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <div class="d-inline-block "><i class="fas fa-exclamation-circle fa-2x" style="color:red;"></i></div>
+            <div class="d-inline-block  mx-3" style="width: 800px"><span class="text-wrap"> Be advised: creating a ticket manually, thus bypassing First Line queue can interrupt with completion flow and priority orders can therefore not be guaranteed!</span></div>
+        </div>
+    </div>
+    <div class="col-8 m-3 px-4">
+        <form method="post" class="row g-1">
+            <div class="mx-3 col-8">
+                <label for="title" class="form-label">Ticket title</label>
+                <input type="text" class="form-control" id="title" asp-for="TicketTitle" required>
+            </div>
+            <div class="mx-3 col-8">
+                <label for="ticketbody" class="form-label">Ticket body</label>
+                <textarea class="form-control" id="ticketbody" rows="5" asp-for="TicketBody" required></textarea>
+            </div>
+            <div class="mx-3 col-8">
+                <label for="additional" class="form-label">Additional data</label>
+                <textarea class="form-control" id="additional" rows="2" asp-for="AdditionalData"></textarea>
+            </div>
+            <div class="mx-3 col-8">
+                <label for="urgency" class="form-label">Urgency</label>
+
+                <select id="urgency" class="form-control" asp-for="Urgency">
+                    <option value="1" selected>Low</option>
+                    <option value="2">Medium</option>
+                    <option value="3">High</option>
+                    <option value="4">Extreme</option>
+                </select>
+            </div>
+
+            <div class="mx-3 my-3 col-8">
+                <button asp-controller="newticket" asp-action="save" class="btn btn-primary">Create new</button>
+            </div>
+        </form>
+    </div>
+</div>

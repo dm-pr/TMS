@@ -1,0 +1,21 @@
+
+
+
+.le-width {
+    width: 900px;
+}
+
+.lr-space {
+    margin-left: 2rem;
+    padding-left: 20px;
+    padding-right: 1.5rem;
+    padding-top: 5px;
+    border: 1px solid rgb(177, 167, 167);
+}
+
+.bd-around {
+    padding: 1.5rem;
+    margin-right: 0;
+    margin-left: 0;
+    
+}

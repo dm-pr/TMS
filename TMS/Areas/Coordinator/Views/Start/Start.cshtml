@@ -1,0 +1,238 @@
+﻿@using TMS.Areas.Coordinator.ViewModels
+@using TMS.ViewModels;
+@model TicketTableBody
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+
+
+<!-- placeholder for report modal -->
+<div id="operatorReportPlaceHolder"></div>
+
+<!-- Close confirmation modal-->
+<div class="modal fade" id="closeConfirm" tabindex="-1" aria-labelledby="closeConfirmLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="closeConfirmLabel">Confirm ticket close - Ticket ID: <span id="closeConfirmTicketId"></span></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Please confirm ticket close. Ticket will be permanently closed and re-open is not possible.
+                Close this ticket ?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form id="closeConfirmForm" method="post" asp-controller="start" asp-action="closeticket">
+                    <input type="hidden" name="id" id="closeConfirmInputId" />
+                    <button type="submit" class="btn btn-primary">Close ticket</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<div class="container overflow-auto mt-0 mx-0 " style="border: 1px solid lightgray; border-radius: 2px; width: 1200px; background-color: rgb(220 225 234)">
+    <div class="m-2 border border-secondary bg-light" style="text-align:center">
+        <div>
+            <canvas id="myChart" style="width: 960px; height:200px; margin: auto"></canvas>
+        </div>
+    </div>
+    <div class="px-3 pt-1" style="height:50px; border: 1px solid black; background-color: rgb(42 42 42); color: white; display:flex; align-items: center">
+        <span class="h5 text-white">Ticket queue</span>
+    </div>
+    <table class="table table-dark table-striped table-hover table-borderless">
+        <thead class="table-dark">
+            <tr>
+                <th></th>
+                <th scope="col" style="white-space: nowrap !important;"># <a asp-route-pagesize="@Model.PageSize" asp-route-currentpage="1" asp-route-sortcolumn="id" asp-route-sortasc="@(!Model.sortAsc)"><span style="cursor: pointer"><i class="fas fa-sort"></i></span></a></th>
+                <th scope="col" style="white-space: nowrap !important;">Created <a asp-route-pagesize="@Model.PageSize" asp-route-currentpage="1" asp-route-sortcolumn="created" asp-route-sortasc="@(!Model.sortAsc)"><span style="cursor: pointer"><i class="fas fa-sort"></i></span></a></th>
+                <th scope="col" style="white-space: nowrap !important;">Title <a asp-route-pagesize="@Model.PageSize" asp-route-currentpage="1" asp-route-sortcolumn="title" asp-route-sortasc="@(!Model.sortAsc)"><span style="cursor: pointer"><i class="fas fa-sort"></i></span></a></th>
+                <th scope="col" style="white-space: nowrap !important;">Urgency <a asp-route-pagesize="@Model.PageSize" asp-route-currentpage="1" asp-route-sortcolumn="urgency" asp-route-sortasc="@(!Model.sortAsc)"><span style="cursor: pointer"><i class="fas fa-sort"></i></span></a></th>
+                <th scope="col" style="white-space: nowrap !important;">Assigned <a asp-route-pagesize="@Model.PageSize" asp-route-currentpage="1" asp-route-sortcolumn="assigned" asp-route-sortasc="@(!Model.sortAsc)"><span style="cursor: pointer"><i class="fas fa-sort"></i></span></a></th>
+                <th scope="col" style="white-space: nowrap !important;">Completed <a asp-route-pagesize="@Model.PageSize" asp-route-currentpage="1" asp-route-sortcolumn="completed" asp-route-sortasc="@(!Model.sortAsc)"><span style="cursor: pointer"><i class="fas fa-sort"></i></span></a></th>
+
+            </tr>
+        </thead>
+        <tbody>
+
+
+            @foreach (var item in Model.TicketTableItems)
+            {
+                <tr data-href="#">
+                    <td>
+                        @if (item.OperatorReportId != 0 && item.Closed == DateTime.MinValue)
+                        {
+                            <i class='fas fa-exclamation' style="color: rgb(174 150 6)"></i>
+                        }
+                        else
+                        {
+                            <span>&nbsp;</span>;
+                        }
+                    </td>
+                    <th scope="row" style="white-space: nowrap !important;">
+                        @if (item.Closed != DateTime.MinValue)
+                        {<span class="text-success">@item.Id</span>}
+                    else if (item.Assigned)
+                    {<span class="text-primary">@item.Id</span>}
+                else
+                { @item.Id}
+                        <a role="button" data-bs-toggle="collapse" data-bs-target="#ticketItem@(item.Id)" aria-expanded="false" aria-controls="bla"><i class="fas fa-chevron-down link-secondary"></i></a>
+                    </th>
+                    <td style="white-space: nowrap !important;">@item.Created.ToString("yyyy-MM-dd")</td>
+                    <td style="white-space: nowrap !important;">@item.TicketTitle</td>
+                    <td style="white-space: nowrap !important;">@item.Urgency.ToString()</td>
+                    <td style="white-space: nowrap !important;">@(item.Assigned ? "Yes": "No")</td>
+                    <td style="white-space: nowrap !important;">@((item.Completed == DateTime.MinValue) ? " - ": item.Completed.ToString("yyyy-MM-dd"))</td>
+
+                </tr>
+
+                <!-- Start collapsible ticket item-->
+
+                string styleString = "";
+                string valueString = "";
+
+                <tr>
+                    <td colspan="7" style="padding: 1px; color: black;">
+                        <div id="ticketItem@(item.Id)" class="collapse">
+                            <div class="card mx-4">
+                                <div class="card-header">
+                                    <img src="~/lib/@(item.Urgency.ToString().ToLower()).png" style="height: 35px;" />
+                                    @item.TicketTitle
+                                </div>
+
+                                <div class="card-body">
+                                    <div class="row">
+
+                                        <div class="col-3">
+                                            <div class="border p-1 m-1 shadow-sm" style="border-radius: 5px; border-color: darkgray; ">
+                                                <span class="small m-1 d-block">Created: @item.Created.ToString("yyyy-MM-dd")</span>
+
+                                                @if (item.Modified == DateTime.MinValue) { styleString = "text-secondary"; valueString = "-"; }
+                                                else { styleString = ""; valueString = item.Modified.ToString("yyyy-MM-dd"); }
+                                                <span class="small m-1 d-block @styleString">Modified: @valueString</span>
+
+                                                @if (item.Closed == DateTime.MinValue) { styleString = "text-secondary"; valueString = "-"; }
+                                                else { styleString = ""; valueString = item.Closed.ToString("yyyy-MM-dd"); }
+                                                <span class="small m-1 d-block @styleString">Closed: @valueString</span>
+
+                                                <hr class="bg-secondary" />
+                                                <span class="small m-1 d-block">Origin: FL/CE </span>
+                                                @if (!item.Assigned) { styleString = "text-secondary"; valueString = " No "; }
+                                                else { styleString = "text-primary"; valueString = " Yes"; }
+                                                <span class="small m-1 d-block @styleString">Assigned: @valueString</span>
+                                            </div>
+
+                                            <div class="border p-1 m-1 bg-light shadow-sm">
+                                                @if (item.Closed == DateTime.MinValue)
+                                                {
+                                                    if (item.Assigned)
+                                                    {
+                                                        <span class="small m-1 d-inline text-secondary">Processing</span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <a href="#" onclick="addToQueue('@item.Id')" class="float-start"><i class="fas fa-link "> Assign</i></a>
+                                                    }
+                                                    <span>&nbsp;</span>
+                                                    <a href="#" class="float-end" onclick="closeTicket_openConfirmation('@item.Id')"><i class="fas fa-times-circle " style="color: rgb(197, 3, 3);"> Close</i></a>
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-secondary">This ticket is closed</span>
+                                                }
+                                            </div>
+
+                                        </div>
+                                        <div class="col-9">
+
+                                            <div class="d-block border shadow-sm" style="word-wrap:break-word;">
+                                                <p class="h6 px-2 py-1 bg-secondary mb-1">Detail</p>
+                                                <div class="small bg-light p-2 overflow-auto" style="height: 100px;">
+                                                    @item.TicketBody
+                                                </div>
+                                            </div>
+                                            <div class="d-block border my-2 shadow-sm" style="word-wrap:break-word;">
+                                                <p class="h6 px-2 py-1 bg-secondary mb-1">Internal notes</p>
+                                                <div class="small bg-light p-2 overflow-auto" style="height: 50px;">
+                                                    @item.AdditionalData
+                                                </div>
+                                            </div>
+
+                                        </div>
+                                        <hr>
+                                        <div class="row">
+                                            <div class="col-10">
+                                                <div class="h5 d-inline">Operator report:</div>
+                                                @if (item.OperatorReportId == 0)
+                                                {
+                                                    <h6 class="small">Not available</h6>
+                                                }
+                                                else
+                                                {
+
+                                                    <h6 class="small text-success">Report available.</h6>
+                                                    <button type="button" class="btn btn-primary" onclick="showReport(@item.OperatorReportId, '@(item.Closed != DateTime.MinValue)' )">
+                                                        Review report
+                                                    </button>
+
+                                                }
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+                <!-- End collapsible ticket item-->
+
+            }
+
+        </tbody>
+        <tfoot>
+            <tr>
+                <td colspan="7">
+                    <div class="btn-group dropend float-start">
+                        <button type="button" class="btn btn-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                            Page Size
+                        </button>
+                        <ul class="dropdown-menu" aria-labelledby="dropdownMenu2">
+                            <li><a class="dropdown-item" asp-all-route-data="Model.RouteData" asp-route-pagesize="10" asp-route-currentpage="1">10</a></li>
+                            <li><a class="dropdown-item" asp-all-route-data="Model.RouteData" asp-route-pagesize="20" asp-route-currentpage="1">20</a></li>
+                            <li><a class="dropdown-item" asp-all-route-data="Model.RouteData" asp-route-pagesize="30" asp-route-currentpage="1">30</a></li>
+                            <li><a class="dropdown-item" asp-all-route-data="Model.RouteData" asp-route-pagesize="40" asp-route-currentpage="1">40</a></li>
+                        </ul>
+                    </div>
+
+
+                    <span class="mx-4">
+                        <a asp-all-route-data="Model.RouteData" asp-route-pagesize="@Model.PageSize" asp-route-currentpage="@((Model.CurrentPage <= 1) ? "1": Model.CurrentPage-1)"><i class="fas fa-angle-double-left"></i></a>
+                    </span>
+                    <div class="btn-group dropend">
+                        <button type="button" class="btn btn-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                            Page number  [@Model.CurrentPage]
+                        </button>
+                        <ul class="dropdown-menu" aria-labelledby="dropdownMenu2">
+                            @for (var i = 1; i <= Model.NumberOfPages; i++)
+                            {
+                                <li>
+                                    <a class="dropdown-item" asp-all-route-data="Model.RouteData" asp-route-pagesize="@Model.PageSize" asp-route-currentpage="@i">@i</a>
+                                </li>
+                            }
+                        </ul>
+                    </div>
+                    <span class="mx-4">
+                        <a asp-all-route-data="Model.RouteData" asp-route-pagesize="@Model.PageSize" asp-route-currentpage="@((Model.CurrentPage >= Model.NumberOfPages) ? Model.NumberOfPages : Model.CurrentPage+1)"><i class="fas fa-angle-double-right"></i></a>
+                    </span>                    
+                </td>
+            </tr>
+        </tfoot>
+    </table>
+
+</div>
+
+<script>
+    BuildChart();    
+</script>

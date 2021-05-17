@@ -1,0 +1,145 @@
+﻿@using TMS.Areas.Operator.ViewModels
+@model OperatorReportsViewModel
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+
+
+<div id="operatorReportPlaceHolder"></div>
+
+<div class="container overflow-auto mt-0 mx-0 " style="border: 1px solid lightgray; border-radius: 2px; width: 1200px; background-color: rgb(220 225 234)">
+
+
+    <div class="px-3 pt-1 mt-4" style="height:50px; border: 1px solid black; background-color: rgb(42 42 42); color: white; display:flex; align-items: center">
+        <span class="h5 text-white">Submitted reports</span>
+    </div>
+    <table class="table table-dark table-striped table-hover table-borderless">
+        <thead class="table-dark">
+
+
+            <tr>
+                <td colspan="4">
+                    <div class="btn-group dropend float-start">
+                        <button type="button" class="btn btn-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                            Page Size
+                        </button>
+                        <ul class="dropdown-menu" aria-labelledby="dropdownMenu2">
+                            <li><a class="dropdown-item" asp-all-route-data="Model.RouteData" asp-route-pagesize="10" asp-route-currentpage="1">10</a></li>
+                            <li><a class="dropdown-item" asp-all-route-data="Model.RouteData" asp-route-pagesize="20" asp-route-currentpage="1">20</a></li>
+                            <li><a class="dropdown-item" asp-all-route-data="Model.RouteData" asp-route-pagesize="30" asp-route-currentpage="1">30</a></li>
+                            <li><a class="dropdown-item" asp-all-route-data="Model.RouteData" asp-route-pagesize="40" asp-route-currentpage="1">40</a></li>
+                        </ul>
+                    </div>
+
+
+                    <span class="mx-4">
+                        <a asp-all-route-data="Model.RouteData" asp-route-pagesize="@Model.PageSize" asp-route-currentpage="@((Model.CurrentPage <= 1) ? "1": Model.CurrentPage-1)"><i class="fas fa-angle-double-left"></i></a>
+                    </span>
+                    <div class="btn-group dropend">
+                        <button type="button" class="btn btn-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                            Page number  [@Model.CurrentPage]
+                        </button>
+                        <ul class="dropdown-menu" aria-labelledby="dropdownMenu2">
+                            @for (var i = 1; i <= Model.NumberOfPages; i++)
+                            {
+                                <li>
+                                    <a class="dropdown-item" asp-all-route-data="Model.RouteData" asp-route-pagesize="@Model.PageSize" asp-route-currentpage="@i">@i</a>
+                                </li>
+                            }
+                        </ul>
+                    </div>
+                    <span class="mx-4">
+                        <a asp-all-route-data="Model.RouteData" asp-route-pagesize="@Model.PageSize" asp-route-currentpage="@((Model.CurrentPage >= Model.NumberOfPages) ? Model.NumberOfPages : Model.CurrentPage+1)"><i class="fas fa-angle-double-right"></i></a>
+                    </span>
+                </td>
+            </tr>
+
+            <tr>
+                <th scope="col" style="white-space: nowrap !important; width: 100px"> # <a asp-route-pagesize="@Model.PageSize" asp-route-currentpage="1" asp-route-sortcolumn="id" asp-route-sortasc="@(!Model.sortAsc)"><span style="cursor: pointer"><i class="fas fa-sort"></i></span></a></th>
+                <th scope="col" style="white-space: nowrap !important; width: 100px">For Ticket # <a asp-route-pagesize="@Model.PageSize" asp-route-currentpage="1" asp-route-sortcolumn="ticketid" asp-route-sortasc="@(!Model.sortAsc)"><span style="cursor: pointer"><i class="fas fa-sort"></i></span></a></th>
+                <th scope="col" style="white-space: nowrap !important; width: 200px">Created <a asp-route-pagesize="@Model.PageSize" asp-route-currentpage="1" asp-route-sortcolumn="created" asp-route-sortasc="@(!Model.sortAsc)"><span style="cursor: pointer"><i class="fas fa-sort"></i></span></a></th>
+                <th scope="col" style="white-space: nowrap !important;">Report Title <a asp-route-pagesize="@Model.PageSize" asp-route-currentpage="1" asp-route-sortcolumn="title" asp-route-sortasc="@(!Model.sortAsc)"><span style="cursor: pointer"><i class="fas fa-sort"></i></span></a></th>
+            </tr>
+
+
+        </thead>
+        <tbody>
+
+            @foreach (var item in Model.ReportTableItems)
+            {
+            <tr>
+                <th scope="row" style="white-space: nowrap !important;">
+                    <a href="#" onclick="showReport(@item.Id)"><span class="text-primary">@item.Id</span></a>
+                </th>
+                <td style="white-space: nowrap !important;">@item.TicketId</td>
+                <td style="white-space: nowrap !important;">@item.Created.ToString("yyyy-MM-dd")</td>
+                <td style="white-space: nowrap !important;">@item.Title</td>
+            </tr>
+            }
+
+        </tbody>
+    </table>
+
+
+    <div class="border  mt-5 bg-light">
+        <div class="px-3 pt-1" style="height:50px; border: 1px solid black; background-color: rgb(42 42 42); color: white; display:flex; align-items: center">
+            <span class="h5 text-white">Reporting</span>
+        </div>
+        <h4 class="text-danger">@Html.ValidationMessage("reporterror")</h4>
+        <div class="bg-light mx-2 border small text-secondary px-2">View by choosing report from the list or choose active ticket to create new completion report</div>
+        <div class="bg-light mt-1">
+
+            <div class="row">
+                <div class="col-6 ">
+
+                    <span class="input-group">
+                        <label class="input-group-text">Active Tickets: </label>
+                        <select id="active-ticket-list" class="input-group-item form-select" style="width: 200px;">
+                            <option value="0" selected>Choose active ticket</option>
+                        </select>
+                        <button class="btn btn-outline-dark" type="button" onclick="prepareEditorWithTemplate()">Create report</button>
+                    </span>
+                </div>
+
+                <div class="col-6 align-content-end align-items-end">
+                    <button class="btn btn-outline-dark float-end" type="button" onclick="saveReport()">Save report</button>
+                    <button class="btn btn-outline-dark float-end" type="button" onclick="resetEditor()">Cancel</button>
+                </div>
+            </div>
+        </div>
+
+
+
+        <form id="reportForm" asp-controller="report" asp-action="createnew" method="post">
+            <div class="border px-3">
+                <span class="px-2"><i class="fas fa-stop" style="color: palegoldenrod;"></i> Filled automatically, non-editable </span>
+                <span class="px-2"><i class="fas fa-stop" style="color: rgb(219, 219, 219);"></i> Original issue description, non-editable </span>
+                <span class="px-2"><i class="fas fa-stop" style="color: rgb(199, 238, 181);"></i> Report area, editable </span>
+            </div>
+
+            <textarea id="editor" class="mceNonEditable">    
+            </textarea>
+
+            <input id="inputTitle" type="hidden" name="Title" />
+            <input id="inputBody" type="hidden" name="Body" />
+            <input id="inputCreated" type="hidden" name="Created" />
+            <input id="inputTicketId" type="hidden" name="TicketId" />
+            <input id="inputOperatorId" type="hidden" name="OperatorId" />
+
+        </form>
+    </div>
+
+</div>
+
+<script src="~/lib/tinymce/js/tinymce/tinymce.min.js"></script>
+<script>
+
+    tinymce.init({
+        height: 900,
+        selector: '#editor',
+        plugins: 'noneditable',
+        noneditable_editable_class: 'mceEditable'
+    });
+
+
+    populateTicketList();
+
+</script>
