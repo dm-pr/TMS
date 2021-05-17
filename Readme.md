@@ -52,10 +52,10 @@ This demo's user stories are as follows:
 
 **Notes**:
 
-API controllers have extensive error handling
-Validation should prevent bad parameters and request parameters manipulation/injection that result
-in thrown exceptions are handled in most basic way - via middleware and Error method in Login Controller.
-HTTP Code errors like 404 have very basic middleware handling
+API controllers have extensive error handling. 
+Validation prevents bad parameters. Request parameters manipulation/injection that result
+in thrown exceptions is handled in most basic way - via middleware and Error method in Login Controller.
+HTTP code errors like 404 have very basic middleware handling also.
 Some hardcoded error messages and alerts. Also hardcoded report templates.
 
 ** This code is fully open for anyone to take whatever they want, completelly free **
