@@ -57,5 +57,16 @@ Validation prevents bad parameters. Request parameters manipulation/injection th
 in thrown exceptions is handled in most basic way - via middleware and Error method in Login Controller.
 HTTP code errors like 404 have very basic middleware handling also.
 Some hardcoded error messages and alerts. Also hardcoded report templates.
+Set mode is 'Production'  Change to 'Development' in launchsettings.json if desired.
 
 ** This code is fully open for anyone to take whatever they want, completelly free **
+
+
+
+##How to actually test it##
+
+1. Download project and extract somewhere
+1. Use Sql Server 2019 or whatever works with EF Core
+1. Run sql script with SSMS or equivalent
+1. Fix connection string in appsettings.json
+1. Rebuild and start :)
