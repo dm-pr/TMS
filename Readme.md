@@ -1,4 +1,4 @@
-TMS (Ticket Management Section)
+# TMS (Ticket Management Section)
 
 
 This is my two-weeks final project I did on Lexicon C# course.
@@ -37,7 +37,7 @@ From Operator perspective:
 * Operator can mark ticket as completed.
 
 
-# Techniques / concepts / frameworks used:
+## What I've used used:
 
 * ASP.Net Core MVC with no Razor Pages
 * Entity Framework Core 
@@ -57,3 +57,4 @@ in thrown exceptions are handled in most basic way - via middleware and Error me
 HTTP Code errors like 404 have very basic middleware handling
 Some hardcoded error messages and alerts. Also hardcoded report templates.
 
+** This code is fully open for anyone to take whatever they want, completelly free **
