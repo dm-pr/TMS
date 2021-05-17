@@ -64,4 +64,8 @@
 
 
 TMS/wwwroot/lib/* linguist-vendored
-jquery.js -linguist-vendored
+TMS/wwwroot/lib/bootstrap linguist-vendored
+TMS/wwwroot/lib/chart.js linguist-vendored
+TMS/wwwroot/lib/fontawesome linguist-vendored
+TMS/wwwroot/lib/tinymce linguist-vendored
+
