@@ -63,10 +63,15 @@ Set mode is 'Production'  Change to 'Development' in launchsettings.json if desi
 
 
 
-##How to actually test it##
+### How to actually test it
 
 1. Download project and extract somewhere
 1. Use Sql Server 2019 or whatever works with EF Core
 1. Run sql script with SSMS or equivalent
 1. Fix connection string in appsettings.json
 1. Rebuild and start :)
+
+
+### Screenshots
+
+I've now added some screenshots in _Screenshots_ folder
