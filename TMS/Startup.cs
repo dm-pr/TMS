@@ -28,7 +28,7 @@ namespace TMS
         {
             services.AddControllersWithViews();
 
-            services.AddDbContext<AppDbContext>(opt => opt.UseSqlServer(Configuration.GetConnectionString("sqlServerConnectionString")));
+            services.AddDbContext<AppDbContext>(opt => opt.UseSqlServer(Configuration.GetConnectionString("DBCONN")));
 
             services.AddScoped<ITicketRepository, TicketRepositorySql>();
             services.AddScoped<IOperatorRepository, OperatorRepositorySql>();
